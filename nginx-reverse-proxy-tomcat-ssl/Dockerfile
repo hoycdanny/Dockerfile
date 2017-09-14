@@ -1,5 +1,5 @@
 From tomcat:7.0-jre7
-MAINTAINER Danny Ho <hoyc.danny@gmail.com>
+MAINTAINER Danny,Ho <danny.ho@hpe.com>
 RUN $JAVA_HOME/bin/keytool -genkey -alias tomcat -keyalg RSA -storepass changeit -keypass changeit -dname "CN=example.com,OU=,O=,L=,S=,C=SE"
 RUN sed -i 's/<Service name="Catalina">/<Service name="Catalina"> \n\n <Connector port="8443" protocol="org.apache.coyote.http11.Http11NioProtocol"\n maxThreads="150" SSLEnabled="true" scheme="https" secure="true"\n clientAuth="false" sslProtocol="TLS" \/>/' conf/server.xml
 RUN apt-get update && apt-get upgrade && apt-get -y install  \

@@ -1,5 +1,5 @@
 FROM ubuntu:14.04.2
-MAINTAINER danny.ho@hpe.com
+MAINTAINER Danny,Ho <danny.ho@hpe.com>
 RUN apt-get update
 RUN apt-get -y install \
 	wget qt4-dev-tools \ 
