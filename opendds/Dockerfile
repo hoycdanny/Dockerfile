@@ -14,5 +14,5 @@ RUN make install
 ENV DDS_ROOT /OpenDDS-3.10
 ENV ACE_ROOT=/OpenDDS-3.10/ACE_wrappers
 ENV TAO_ROOT=/OpenDDS-3.10/ACE_wrappers
-WORKDIR /OpenDDS-3.10/bin
+#WORKDIR /OpenDDS-3.10/bin
 #RUN ./auto_run_tests.pl
