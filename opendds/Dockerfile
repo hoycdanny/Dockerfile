@@ -4,7 +4,8 @@ RUN apt-get update
 RUN apt-get -y install \
 	wget qt4-dev-tools \ 
 	build-essential libxerces-c-dev \
-	libboost-all-dev libglib2.0-dev 
+	libboost-all-dev libglib2.0-dev
+apt-get clean all 
 RUN wget https://github.com/objectcomputing/OpenDDS/releases/download/DDS-3.10/OpenDDS-3.10.tar.gz
 RUN tar -zxvf OpenDDS-3.10.tar.gz
 WORKDIR OpenDDS-3.10
