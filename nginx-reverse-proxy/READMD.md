@@ -22,9 +22,9 @@ This repository contains **Dockerfile** of [Nginx](http://nginx.org/) for [Docke
 
     docker run -tdi -e PROXY_PASS=https://www.nginx.com -e PROXY_PATH=nginx -p 80:80 nginx-reverse-proxy
 
-#### Attach persistent/shared directories
+### Attach persistent/shared directories
 
     docker run -tdi -e PROXY_PASS=**PASS_URL** -e PROXY_PATH=**PASS_PATH** -p 80:80 nginx-reverse-proxy
 
-After few seconds, open `http://<host>` and `http://<host>/PASS_PATH` to see the welcome page and PASS_URL.
+After few seconds, open `http://localhost` and `http://localhost/PASS_PATH` to see the welcome page and PASS_URL.
 
