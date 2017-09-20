@@ -13,18 +13,35 @@ This repository contains **Dockerfile** of [Nginx](http://nginx.org/) for [Docke
 
 1. Install [Docker](https://www.docker.com/).
 
-2. Download [automated build](https://hub.docker.com/r/hoycdanny/nginx-reverse-proxy/) from public [Docker Hub Registry](https://registry.hub.docker.com/): `docker pull hoycdanny/nginx-reverse-proxy`
+2. Download [automated build](https://hub.docker.com/r/hoycdanny/nginx-reverse-proxy/) from public [Docker Hub Registry](https://registry.hub.docker.com/): 
+   `docker pull hoycdanny/nginx-reverse-proxy`
 
-   (alternatively, you can build an image from Dockerfile: `docker build -t="hoycdanny/nginx-reverse-proxy" github.com/hoycdanny/nginx-reverse-proxy`)
-
+- You can build an image from Dockerfile: 
+```
+git clone https://github.com/hoycdanny/Dockerfile
+cd Dockerfile/nginx-reverse-proxy
+docker build -t /hoycdanny/nginx-reverse-proxy . 
+```
+- You can edit container boot run shell-script `docker-entrypoint.sh`.
 
 ### Usage
-
-    docker run -tdi -e PROXY_PASS=https://www.nginx.com -e PROXY_PATH=nginx -p 80:80 nginx-reverse-proxy
-
-### Attach persistent/shared directories
-
-    docker run -tdi -e PROXY_PASS=**PASS_URL** -e PROXY_PATH=**PASS_PATH** -p 80:80 nginx-reverse-proxy
-
-After few seconds, open `http://localhost` and `http://localhost/PASS_PATH` to see the welcome page and PASS_URL.
-
+```
+    docker run -tdi \ 
+      -e PROXY_PASS=https://www.nginx.com \
+      -e PROXY_PATH=nginx  \
+      -p 80:80 \
+      nginx-reverse-proxy
+```
+### Attach persistent/shared directories.
+```
+    docker run -tdi \
+      -e PROXY_PASS=PASS_URL \
+      -e PROXY_PATH=PASS_PATH \
+      -p 80:80 \
+      nginx-reverse-proxy
+```
+After few seconds open you browser.
+```
+curl http://localhost               #nginx welcom page
+curl http://localhost/PASS_PATH     #PASS_URL
+```
