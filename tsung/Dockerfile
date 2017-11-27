@@ -1,52 +1,63 @@
-FROM centos:7
-MAINTAINER Danny Ho <danny.ho@hpe.com>
-RUN yum install -y \
-    epel-release
-RUN yum install -y \
-    gd \
-    gcc \
-    wget \
-    curl \
-    zlib \
-    perl \
-    libpng \
-    erlang \
-    gnuplot \
-    openssh \
-    openssh-server \
-    openssh-clients \
-    perl-Template-Toolkit \
-    perl-RRD-Simple.noarch \
-    perl-Log-Log4perl-RRDs.noarch
-WORKDIR /tmp
-RUN wget http://tsung.erlang-projects.org/dist/tsung-1.6.0.tar.gz
-RUN tar -zxvf tsung-1.6.0.tar.gz
-RUN cd /tmp/tsung-1.6.0 && \
-    ./configure --prefix=/usr/local/tsung && \
-    make && \
-    make install && \
-    cd / && rm -Rf /tmp/tsung-1.6.0 && \
-    /usr/local/tsung/bin/tsung -v && \
-    mkdir -p /usr/local/lib/tsung/bin && \
-    ln -s /usr/local/tsung/lib/tsung/bin/* /usr/local/lib/tsung/bin
+FROM          centos:centos7
+MAINTAINER    Danny,Ho <danny.ho@hpe.com>
 
-#RUN wget \
-#    http://packages.erlang-solutions.com/site/esl/esl-erlang/FLAVOUR_1_general/esl-erlang_20.1-1~ubuntu~xenial_amd64.deb
-#RUN wget \
-#    http://ppa.launchpad.net/nilarimogard/webupd8/ubuntu/pool/main/w/wxwidgets2.8/libwxbase2.8-0_2.8.12.1+dfsg2-2ubuntu2+1~webupd8~xenial0_amd64.deb
-#RUN wget \
-#    http://kr.archive.ubuntu.com/ubuntu/pool/universe/w/wxwidgets3.0/libwxbase3.0-0_3.0.0-2_amd64.deb
-#RUN dpkg -i libwxbase2.8-0_2.8.12.1+dfsg2-2ubuntu2+1~webupd8~xenial0_amd64.deb
-#RUN dpkg -i libwxbase3.0-0_3.0.0-2_amd64.deb
-#RUN apt-get install -y \
-#    libwxbase3.0-0v5
-#RUN apt-get install -y apt-utils libsctp1 libwxgtk2.8-0 libwxgtk3.0-0 libwxgtk3.0-0v5
-#RUN dpkg -i esl-erlang_20.1-1~ubuntu~xenial_amd64.deb
-#RUN wget http://tsung.erlang-projects.org/dist/tsung-1.6.0.tar.gz
-#RUN tar -xvzf tsung-1.6.0.tar.gz
-#WORKDIR tsung-1.6.0/
-#RUN ./configure && make && make install
-#WORKDIR /
-#COPY docker-entrypoint.sh /usr/local/bin/
-#RUN ln -s usr/local/bin/docker-entrypoint.sh /entrypoint.sh
-#ENTRYPOINT sh entrypoint.sh && bash
+RUN yum update -y
+#RUN rpm -Uvh "http://download.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm"
+RUN rpm -Uvh "https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm"
+RUN yum -y install  crontabs\
+                    erlang \
+                    firefox \
+                    gnuplot perl-Template-Toolkit \
+                    jq \
+                    openssh \
+                    openssh-server \
+                    openssh-clients \
+                    perl-Log-Log4perl-RRDs.noarch \
+                    tar
+RUN curl http://tsung.erlang-projects.org/dist/tsung-1.6.0.tar.gz --output /tmp/tsung-1.6.0.tar.gz \
+    && cd /tmp/ \
+    && tar -xvf ./tsung-1.6.0.tar.gz \
+    && cd tsung-1.6.0 \
+    && ./configure \
+    && make debug \
+    && make install \
+    && rm -rf /tmp/tsung*
+
+
+RUN ssh-keygen -N "" -f /root/.ssh/id_rsa && \
+    cp /root/.ssh/id_rsa.pub /root/.ssh/authorized_keys && \
+    echo "Port 21" > /root/.ssh/config && \
+    echo "StrictHostKeyChecking no" >> /root/.ssh/config && \
+    echo "UserKnownHostsFile /dev/null" >> /root/.ssh/config
+
+#RUN mkdir -p /var/log/tsung && echo "" > /var/log/tsung/tsung.log
+
+ENV ERL_SSH_PORT 21
+ENV ERL_EPMD_PORT=4369
+ENV BINDIR=/usr/lib64/erlang/erts-5.8.5/
+
+
+RUN mkdir -p /usr/local/tsung
+VOLUME ["/usr/local/tsung"]
+
+
+RUN sed -i.bak s/"64000"/"9001"/g /usr/bin/tsung
+RUN sed -i.bak s/"65500"/"9050"/g /usr/bin/tsung
+RUN printf "[{kernel,[{inet_dist_listen_min,9001},{inet_dist_listen_max,9050}]}]. \n\n" > /root/sys.config
+RUN sed -i.bak s/"erlexec"/"erlexec -config \/root\/sys "/g /usr/bin/erl
+
+
+RUN mkdir -p /etc/tsung/
+RUN echo "* * * * * /usr/bin/tsung-update-hosts >> /var/log/tsung/tsung-update-hosts.log 2>&1" > /etc/crontab
+#RUN touch /var/log/tsung/tsung-update-hosts.log
+
+COPY ./tsung-hosts.sh /usr/bin/tsung-update-hosts
+RUN chmod +x /usr/bin/tsung-update-hosts
+COPY ./tsung-run.sh /usr/bin/tsung-run
+RUN chmod +x /usr/bin/tsung-run
+
+EXPOSE 22
+EXPOSE 8091
+EXPOSE 4369
+EXPOSE 9001-9050
+#ENTRYPOINT ["tsung-run"]
